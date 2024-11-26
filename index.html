@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time Converter</title>
+  <style>
+    body {
+      background-color: #0f0f0f;
+      color: #33ff33;
+      font-family: "Courier New", Courier, monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    #muscat, #stjohns {
+      font-size: 2rem;
+    }
+    .time-label {
+      margin: 0.5rem 0;
+      font-size: 1.2rem;
+      color: #77ff77;
+    }
+    input, button {
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 5px;
+      margin-top: 10px;
+      color: #0f0f0f;
+      background-color: #33ff33;
+      border: none;
+      border-radius: 5px;
+    }
+    button:hover {
+      cursor: pointer;
+      background-color: #55ff55;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>Muscat, OM ↔ St. Johns, NL</h1>
+    <div class="time">
+      <div id="muscat">
+        <div class="time-label">Muscat Time:</div>
+        <div id="muscat-time">--:--:--</div>
+      </div>
+      <div id="stjohns" style="margin-top: 20px;">
+        <div class="time-label">St. John's Time:</div>
+        <div id="stjohns-time">--:--:--</div>
+      </div>
+    </div>
+
+    <hr style="margin: 20px; border-color: #33ff33;">
+    <div>
+      <label for="muscat-input" class="time-label">Enter Muscat Time:</label>
+      <input type="time" id="muscat-input">
+      <button onclick="convertToStJohns()">Convert to St. John's</button>
+      <p id="converted-stjohns" class="time-label"></p>
+    </div>
+    <div>
+      <label for="stjohns-input" class="time-label">Enter St. John's Time:</label>
+      <input type="time" id="stjohns-input">
+      <button onclick="convertToMuscat()">Convert to Muscat</button>
+      <p id="converted-muscat" class="time-label"></p>
+    </div>
+  </div>
+  <script>
+    // Offset hours for Muscat (+4 UTC) and St. John's (-3:30 UTC)
+    const MUSCAT_OFFSET = 4 * 60;
+    const STJOHNS_OFFSET = -3 * 60 - 30;
+
+    function formatTime(date) {
+      return date.toLocaleTimeString('en-CA', { hour12: false });
+    }
+
+    function updateTimes() {
+      const nowUTC = new Date(Date.now() + (new Date()).getTimezoneOffset() * 60000);
+
+      // Calculate Muscat time
+      const muscatTime = new Date(nowUTC.getTime() + MUSCAT_OFFSET * 60000);
+      document.getElementById('muscat-time').textContent = formatTime(muscatTime);
+
+      // Calculate St. John's time
+      const stjohnsTime = new Date(nowUTC.getTime() + STJOHNS_OFFSET * 60000);
+      document.getElementById('stjohns-time').textContent = formatTime(stjohnsTime);
+    }
+
+    function convertToStJohns() {
+      const muscatInput = document.getElementById('muscat-input').value;
+      if (!muscatInput) {
+        alert('Please enter a valid Muscat time!');
+        return;
+      }
+
+      const [hours, minutes] = muscatInput.split(':').map(Number);
+      const muscatDate = new Date();
+      muscatDate.setUTCHours(hours - 4, minutes, 0, 0); // Convert Muscat time to UTC
+      const stjohnsDate = new Date(muscatDate.getTime() + (STJOHNS_OFFSET - MUSCAT_OFFSET) * 60000);
+      document.getElementById('converted-stjohns').textContent = 
+        `St. John's Time: ${formatTime(stjohnsDate)}`;
+    }
+
+    function convertToMuscat() {
+      const stjohnsInput = document.getElementById('stjohns-input').value;
+      if (!stjohnsInput) {
+        alert('Please enter a valid St. John\'s time!');
+        return;
+      }
+
+      const [hours, minutes] = stjohnsInput.split(':').map(Number);
+      const stjohnsDate = new Date();
+      stjohnsDate.setUTCHours(hours + 3, minutes + 30, 0, 0); // Convert St. John's time to UTC
+      const muscatDate = new Date(stjohnsDate.getTime() + (MUSCAT_OFFSET - STJOHNS_OFFSET) * 60000);
+      document.getElementById('converted-muscat').textContent = 
+        `Muscat Time: ${formatTime(muscatDate)}`;
+    }
+
+    setInterval(updateTimes, 1000); // Update every second
+    updateTimes(); // Initialize
+  </script>
+</body>
+</html>
